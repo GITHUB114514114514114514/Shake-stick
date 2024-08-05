@@ -1,0 +1,93 @@
+#include <STC8G.H>		        		//头文件
+#include "intrins.h"		
+#define U8 unsigned char	  			//将unsigned char 写为U8（方便）	
+#define U16 unsigned int				//将unsigned int 写为U16（方便）	
+U8 i;									//定义i
+U16 disp_zhr[48]={
+0x300E,0x77EE,0x77EE,0x77EE,0x07E0,0xFF7F,0xFF7F,0x0000,0x7B3F,0xB75F,0xEF6F,0xDF77,0xBF7B,0xBF7F,0xFFFF,0xFFFF,/*张*/
+0xFFFF,0xFFFF,0xFFBF,0xE0DB,0x7EE3,0xBEB8,0xDE7B,0xE203,0xDEFF,0xBE03,0x7E7B,0xE07B,0xFF7B,0xFF03,0xFFFF,0xFFFF,/*贺*/
+0xFFEF,0xEFF7,0xF3E9,0x3EDA,0xEF96,0xF3C6,0xFFF0,0xFFDF,0xFFCD,0xF3E5,0x6FF0,0xFFE5,0x7FCD,0xF3DE,0xEFFF,0xFFFF/*然*/
+};										//数组------使后面的for语句调用按顺序输出16位的高低电平
+										/*如0x300E对应for语句的第一遍执行的第一个调用*/
+sbit K=P3^1;							//位定义K------水银开关	
+sbit K2=P3^0;							//位定义K2------水银开关
+	
+void Delay1ms()		//@12.000MHz		//延迟函数
+	{
+	unsigned char data i, j;
+	
+	i = 16;
+	j = 147;
+	do
+		{
+		while (--j);
+		} while (--i);
+	}
+
+
+void main()								//主函数
+	{
+	 P1M0=0XFF; P1M1=0X00;				//激活芯片P1脚位
+	 P3M0=0XFC; P3M1=0X00;				//激活芯片P3脚位		 
+	 P5M0=0XFF; P5M1=0X00;				//激活芯片P5脚位		
+	 									/*M0为输出 M1为输入*/
+	 while(1)							//使if语句循环判定
+	   	{
+		if(K==1&K2==0)					//if判断 当K为高电平 K2为低电平 执行语句
+			{  		  
+			for(i=0;i<48;i++)			//for循环 i=0 当i<48时 i++ 执行语句 在判断i是否<48 执行48次
+				{
+				P11=disp_zhr[i]&0x0001;	//找到P11对应的16位数（i代表第几个）如果i为0，就找到0x300E便让0x300E与上	
+				P10=disp_zhr[i]&0x0002;	/*0x0001，有一位是0，就为低电平；全是1，就为高电平。i随执行次数慢慢变大*/
+				P37=disp_zhr[i]&0x0004;	/*就让第一个，第二个******与上0x0001，从而改变每一次循环P11的高低电平*/
+				P36=disp_zhr[i]&0x0008;
+				P35=disp_zhr[i]&0x0010;
+				P34=disp_zhr[i]&0x0020;					
+				P33=disp_zhr[i]&0x0040;
+				P32=disp_zhr[i]&0x0080;					
+				P12=disp_zhr[i]&0x0100;
+				P13=disp_zhr[i]&0x0200;
+				P14=disp_zhr[i]&0x0400;
+				P15=disp_zhr[i]&0x0800;
+				P16=disp_zhr[i]&0x1000;
+				P17=disp_zhr[i]&0x2000;
+				P54=disp_zhr[i]&0x4000;
+				P55=disp_zhr[i]&0x8000;/*与上述P11说明相同*/	
+				Delay1ms();            //使每一次循环延迟一秒，让我们看的见						 										
+		    	}	
+				Delay1ms();
+				P1=0XFF;
+				P3=0XFF;
+				P5=0XFF;
+				Delay1ms();            //让16个灯熄灭，使灯有反应时间
+			}	 	
+		if(K==0&K2==1)				   //if判断 当K为低电平 K2为高电平 执行语句
+			{ 
+			for(i=48;i>0;i--)		   //for循环 i=48 当i>0时 i-- 执行语句 在判断i是否>0 执行48次
+				{	
+				P11=disp_zhr[i]&0x0001;//找到P11对应的16位数（i代表第几个）如果i为48，就找到0xFFFF兵让0xFFFF与上
+				P10=disp_zhr[i]&0x0002;/*0x0001，有一位是0，就为低电平；全是1，就为高电平。i随执行次数慢慢变小*/
+				P37=disp_zhr[i]&0x0004;/*就让第四十八个，第四十七个******与上0x0001，从而改变每一次循环P11的高低*/
+				P36=disp_zhr[i]&0x0008;/*电平*/
+				P35=disp_zhr[i]&0x0010;
+				P34=disp_zhr[i]&0x0020;
+				P33=disp_zhr[i]&0x0040;
+				P32=disp_zhr[i]&0x0080;
+				P12=disp_zhr[i]&0x0100;
+				P13=disp_zhr[i]&0x0200;
+				P14=disp_zhr[i]&0x0400;
+				P15=disp_zhr[i]&0x0800;
+				P16=disp_zhr[i]&0x1000;
+				P17=disp_zhr[i]&0x2000;
+				P54=disp_zhr[i]&0x4000;
+				P55=disp_zhr[i]&0x8000;/*与上述P11说明相同*/	
+				Delay1ms();			   //使每一次循环延迟一秒，让我们看的见	
+			    }
+			}
+				Delay1ms();
+			   	P1=0XFF;
+				P3=0XFF;
+				P5=0XFF;
+				Delay1ms();
+		}			                   //让16个灯熄灭，使灯有反应时间
+	}			
